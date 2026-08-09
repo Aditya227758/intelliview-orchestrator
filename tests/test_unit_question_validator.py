@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from workers.evaluation_pipeline import validate_generated_question
+from workers.evaluation_pipeline import check_for_bias, validate_generated_question
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -63,6 +63,11 @@ class TestBannedTopics:
         is_valid, reasons = validate_generated_question("What is your RELIGION?")
         assert not is_valid
         assert any("banned topic" in r for r in reasons)
+
+    def test_children_question_triggers_bias_warning(self):
+        is_safe, reasons = check_for_bias("How many children do you have?")
+        assert not is_safe
+        assert any("children" in r.lower() for r in reasons)
 
 
 # ---------------------------------------------------------------------------

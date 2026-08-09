@@ -16,6 +16,8 @@ from metrics.prometheus_metrics import SESSIONS_ACTIVE, SESSIONS_CREATED
 from orchestrator import http_cache
 from orchestrator.scheduler import TaskPriority
 from orchestrator.security import get_current_user, require_role
+from monitoring.websocket_manager import ws_manager
+from workers.evaluation_pipeline import check_for_bias
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +78,7 @@ class SessionStatusResponse(BaseModel):
     start_time: str | None = None
     end_time: str | None = None
     updated_at: str | None = None
+    bias_warning: str | None = None
 
 
 class ReportCandidate(BaseModel):
@@ -365,6 +368,7 @@ def create_session_routes(
                 start_time=session_data.get("start_time"),
                 end_time=session_data.get("end_time"),
                 updated_at=session_data.get("updated_at"),
+                bias_warning=session_data.get("bias_warning"),
             )
 
         except HTTPException:
@@ -780,6 +784,35 @@ def create_session_routes(
             if not question:
                 raise HTTPException(
                     status_code=404, detail="No more questions available"
+                )
+
+            is_safe, bias_reasons = check_for_bias(question["text"])
+            if not is_safe:
+                bias_warning = (
+                    "Potentially biased or EEOC-prohibited question detected: "
+                    f"{question['text']}"
+                )
+                try:
+                    session_data["bias_warning"] = bias_warning
+                    session_manager.state_sync.set_session_state(
+                        request.session_id, session_data
+                    )
+                    await ws_manager.broadcast_session_update(
+                        session_id=request.session_id,
+                        status=session_data.get("status", ""),
+                        details={"bias_warning": bias_warning},
+                        risk_score=session_data.get("risk_score"),
+                    )
+                except Exception as exc:
+                    logger.warning(
+                        "Failed to broadcast bias warning for %s: %s",
+                        request.session_id,
+                        exc,
+                    )
+            else:
+                session_data.pop("bias_warning", None)
+                session_manager.state_sync.set_session_state(
+                    request.session_id, session_data
                 )
 
             return AskQuestionResponse(

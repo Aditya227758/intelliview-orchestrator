@@ -439,6 +439,15 @@ def _get_banned_patterns() -> list[re.Pattern[str]]:
     return _BANNED_TOPIC_PATTERNS
 
 
+def check_for_bias(question_text: str) -> tuple[bool, list[str]]:
+    """Return whether the question contains any banned EEOC-related topics."""
+    reasons: list[str] = []
+    for pattern in _get_banned_patterns():
+        if pattern.search(question_text):
+            reasons.append(f"banned topic matched: '{pattern.pattern}'")
+    return (len(reasons) == 0, reasons)
+
+
 _YES_NO_RE = re.compile(
     r"^(do|does|did|have|has|had|is|are|was|were|will|would|can|could|should|may|might)\s",
     re.IGNORECASE,
@@ -453,9 +462,8 @@ def validate_generated_question(question: str) -> tuple[bool, list[str]]:
     """Validate an LLM-generated interview question before it is used."""
     reasons: list[str] = []
 
-    for pattern in _get_banned_patterns():
-        if pattern.search(question):
-            reasons.append(f"banned topic matched: '{pattern.pattern}'")
+    is_safe, bias_reasons = check_for_bias(question)
+    reasons.extend(bias_reasons)
 
     length = len(question)
     if length < _MIN_LENGTH:

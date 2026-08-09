@@ -43,6 +43,7 @@ export default function InterviewPage() {
   const [activeSession, setActiveSession] = useState(null);
   const [riskScore, setRiskScore] = useState(0);
   const [feedback, setFeedback] = useState([]);
+  const [biasWarning, setBiasWarning] = useState("");
   const [audioLevels, setAudioLevels] = useState(new Array(32).fill(0));
   const [candidate, setCandidate] = useState("");
   const [starting, setStarting] = useState(false);
@@ -61,6 +62,10 @@ export default function InterviewPage() {
     onMessage: (data) => {
       if (data?.risk_score != null) setRiskScore(data.risk_score);
       if (data?.feedback) setFeedback((prev) => [...prev, data.feedback].slice(-20));
+      const newBiasWarning = data?.details?.bias_warning ?? data?.bias_warning;
+      if (typeof newBiasWarning === "string" && newBiasWarning.trim()) {
+        setBiasWarning(newBiasWarning);
+      }
     },
   });
 
@@ -155,6 +160,7 @@ export default function InterviewPage() {
     setIsPaused(false);
     setRiskScore(0);
     setFeedback([]);
+    setBiasWarning("");
     toast.info("Interview ended");
   };
 
@@ -185,6 +191,17 @@ export default function InterviewPage() {
             </div>
           )}
         </div>
+        {biasWarning ? (
+          <div className="rounded-md border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-amber-100">
+            <div className="flex items-start gap-2">
+              <AlertTriangle size={18} className="mt-0.5 text-amber-300" />
+              <div>
+                <p className="font-semibold">Bias warning</p>
+                <p className="text-sm text-amber-100">{biasWarning}</p>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {!isLive && (
           <Card title="Start interview" description="Begin a new live interview session.">
