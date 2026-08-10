@@ -76,7 +76,10 @@ useEffect(() => {
   const mobileOpen = useUIStore((s) => s.mobileSidebarOpen);
   const setMobileOpen = useUIStore((s) => s.setMobileSidebar);
 
-  useKeyboardNav(() => setHelpOpen(true));
+  useKeyboardNav(
+  () => setHelpOpen(true),
+  () => router.push("/sessions?action=start"),
+);
 
   useEffect(() => {
     const onKey = (e) => {

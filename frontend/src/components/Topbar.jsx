@@ -72,19 +72,22 @@ function Topbar() {
           className="md:hidden"
         />
 
-        <button
-          id="topbar-command-palette"
-          onClick={() =>
-            window.dispatchEvent(new CustomEvent("open-command-palette"))
-          }
-          className="flex items-center gap-2 rounded-md border border-border bg-bg-card px-3 py-1.5 text-xs text-muted hover:border-accent/40 hover:text-zinc-200 transition-colors"
-        >
-          <Search size={14} />
-          <span className="hidden sm:inline">Search&hellip;</span>
-          <kbd className="hidden rounded border border-border bg-bg-panel px-1 text-[10px] sm:inline">
-            ⌘K
-          </kbd>
-        </button>
+        <Tooltip content="Open command palette (Ctrl + K)">
+           <button
+              id="topbar-command-palette"
+              onClick={() =>
+               window.dispatchEvent(new CustomEvent("open-command-palette"))
+                }
+                className="flex items-center gap-2 rounded-md border border-border bg-bg-card px-3 py-1.5 text-xs text-muted hover:border-accent/40 hover:text-zinc-200 transition-colors"
+              >
+                 <Search size={14} />
+                 <span className="hidden sm:inline">Search&hellip;</span>
+                 <kbd className="hidden rounded border border-border bg-bg-panel px-1 text-[10px] sm:inline">
+                   Ctrl K
+                 </kbd>
+              </button>
+          </Tooltip>
+
       </div>
 
       {/* Right: status indicators + auth */}
