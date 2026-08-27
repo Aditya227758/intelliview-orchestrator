@@ -89,6 +89,7 @@ from orchestrator.state_sync import StateSynchronizer
 from orchestrator.worker_registry import WorkerRegistry
 from routers.ab_testing import create_ab_testing_routes
 from routers.candidates import create_candidate_routes
+from routers.practice_sessions import router as practice_sessions_router
 from routers.questions import create_question_routes
 from routers.schedule import create_schedule_routes
 from routers.sessions import (  # noqa: F401 (re-exported for tests)
@@ -1056,6 +1057,7 @@ def _build_risk_report_pdf(report: dict) -> Response:
 
 
 app.include_router(create_candidate_routes(candidate_manager=candidate_manager))
+app.include_router(practice_sessions_router)
 app.include_router(create_schedule_routes())
 app.include_router(create_question_routes(question_bank=question_bank))
 app.include_router(create_settings_routes())
