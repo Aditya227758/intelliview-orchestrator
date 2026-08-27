@@ -424,6 +424,8 @@ def test_sync_state_to_db_handles_database_exception():
 
     db_session.rollback.assert_called_once()
     db_session.close.assert_called_once()
+
+
 # ============================================================================
 # Concurrency & Conflict Resolution Tests (Task Enhancement)
 # ============================================================================
@@ -458,7 +460,11 @@ def test_state_synchronizer_concurrent_racing_cache_updates():
     session_id = "s_race"
 
     def execute_update(index: int):
-        data = {"session_id": session_id, "status": f"STATUS_{index}", "risk_score": index * 0.1}
+        data = {
+            "session_id": session_id,
+            "status": f"STATUS_{index}",
+            "risk_score": index * 0.1,
+        }
         return sync.set_session_state(session_id, data)
 
     # Race 10 concurrent threads updating the same session key
@@ -520,7 +526,9 @@ def test_sync_state_to_db_handles_nonexistent_session_conflict():
     sync = StateSynchronizer.__new__(StateSynchronizer)
 
     with patch("database.db.SessionLocal", return_value=db_session):
-        assert sync.sync_state_to_db("missing_session", {"status": "COMPLETED"}) is False
+        assert (
+            sync.sync_state_to_db("missing_session", {"status": "COMPLETED"}) is False
+        )
 
     db_session.commit.assert_not_called()
     db_session.close.assert_called_once()
