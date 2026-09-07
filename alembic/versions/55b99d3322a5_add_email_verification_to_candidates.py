@@ -27,25 +27,46 @@ def upgrade() -> None:
     existing_indexes = {
         ix["name"] for ix in inspector.get_indexes("candidates") if ix.get("name")
     }
+    if "email_verified" not in existing_columns:
+        op.add_column(
+            "candidates",
+            sa.Column(
+                "email_verified",
+                sa.Boolean(),
+                nullable=False,
+                server_default=sa.false(),
+            ),
+        )
 
-    op.add_column(
-        "candidates",
-        sa.Column(
-            "email_verified",
-            sa.Boolean(),
-            nullable=False,
-            server_default=sa.false(),
-        ),
-    )
+    if "verification_token" not in existing_columns:
+        op.add_column(
+            "candidates",
+            sa.Column(
+                "verification_token",
+                sa.String(255),
+                nullable=True,
+            ),
+        )
+    if (
+        "verification_token" in existing_columns
+        and "ix_candidates_verification_token" not in existing_indexes
+    ):
+        op.create_index(
+            "ix_candidates_verification_token",
+            "candidates",
+            ["verification_token"],
+            unique=True,
+        )
 
-    op.add_column(
-        "candidates",
-        sa.Column(
-            "verification_token_expires_at",
-            sa.DateTime(),
-            nullable=True,
-        ),
-    )
+    if "verification_token_expires_at" not in existing_columns:
+        op.add_column(
+            "candidates",
+            sa.Column(
+                "verification_token_expires_at",
+                sa.DateTime(),
+                nullable=True,
+            ),
+        )
 
 
 def downgrade() -> None:
