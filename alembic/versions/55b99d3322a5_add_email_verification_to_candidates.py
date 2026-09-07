@@ -32,20 +32,6 @@ def upgrade() -> None:
         ),
     )
 
-    op.add_column(
-        "candidates",
-        sa.Column(
-            "verification_token",
-            sa.String(255),
-            nullable=True,
-        ),
-    )
-    op.create_index(
-        "ix_candidates_verification_token",
-        "candidates",
-        ["verification_token"],
-        unique=True,
-    )
 
     op.add_column(
         "candidates",
@@ -59,7 +45,5 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Remove email verification fields from candidates."""
-    op.drop_index("ix_candidates_verification_token", table_name="candidates")
     op.drop_column("candidates", "verification_token_expires_at")
-    op.drop_column("candidates", "verification_token")
     op.drop_column("candidates", "email_verified")
