@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { endpoints } from "@/lib/api";
 import { Skeleton, ErrorState, EmptyState } from "@/components/States";
 
 
@@ -32,14 +31,13 @@ export default function QuestionsPage() {
       const data = await response.json();
 
       setQuestions(data.questions || []);
-    } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Unable to load questions";
+        } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Unable to load questions";
 
-        setError(message);
-      }
+      setError(message);
     } finally {
       setLoading(false);
     }
