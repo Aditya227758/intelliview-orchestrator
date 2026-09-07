@@ -140,6 +140,10 @@ services:
       timeout: 10s
       start_period: 30s
       retries: 5
+    # Resource limits prevent the worker from consuming resources needed
+    # by other services. The 4 CPU limit matches the worker concurrency
+    # setting, while 2 GiB provides memory headroom for normal workloads.
+
     deploy:
       resources:
         limits:
@@ -322,8 +326,7 @@ services:
       retries: 3
     networks:
       - ai-interview-network
-    
-
+   
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: ai-interview-jaeger
