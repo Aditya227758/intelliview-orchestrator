@@ -181,12 +181,6 @@ services:
       - beat
       - --loglevel=info
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pgrep -f 'celery.*beat' > /dev/null"]
-      interval: 30s
-      timeout: 5s
-      start_period: 30s
-      retries: 3
 
   cv-service:
     build:
@@ -266,12 +260,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "/app/.venv/bin/python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9540/health', timeout=5)"]
-      interval: 30s
-      timeout: 5s
-      start_period: 15s
-      retries: 3
     networks:
       - ai-interview-network
 
@@ -318,12 +306,6 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 5s
-      start_period: 30s
-      retries: 3
     networks:
       - ai-interview-network
    
