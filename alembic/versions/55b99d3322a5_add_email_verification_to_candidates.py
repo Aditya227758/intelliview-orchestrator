@@ -38,7 +38,6 @@ def upgrade() -> None:
         ),
     )
 
-
     op.add_column(
         "candidates",
         sa.Column(
