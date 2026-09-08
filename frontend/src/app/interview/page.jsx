@@ -302,7 +302,7 @@ export default function InterviewPage() {
                 </div>
               )}
               {isLive && activeSession && (
-                <div className="pointer-events-none left-3 top-3 rounded-md bg-black/60 px-2 py-1 text-[10px] font-mono text-zinc-300">
+                <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-md bg-black/60 px-2 py-1 text-[10px] font-mono text-zinc-300">
                   {activeSession}
                 </div>
               )}
@@ -385,11 +385,11 @@ export default function InterviewPage() {
 
             <Card title="Session Info">
               <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-3 min-w-0">
                   <span className="shrink-0 text-muted">Session</span>
                   <span className="truncate font-mono text-xs text-zinc-300">{activeSession || "—"}</span>
                 </div>
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-3 min-w-0">
                   <span className="shrink-0 text-muted">Candidate</span>
                   <span className="truncate text-zinc-300">{candidate || "—"}</span>
                 </div>
