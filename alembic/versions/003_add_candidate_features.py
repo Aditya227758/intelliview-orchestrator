@@ -40,7 +40,10 @@ def upgrade() -> None:
             "status", sa.String(length=50), nullable=True, server_default="unverified"
         ),
     )
-    op.add_column("candidates", sa.Column("role", sa.String(length=100), nullable=True))
+    op.add_column(
+        "candidates",
+        sa.Column("role", sa.String(length=100), nullable=True),
+    )
     op.add_column(
         "candidates",
         sa.Column("deleted_at", sa.DateTime(), nullable=True),
