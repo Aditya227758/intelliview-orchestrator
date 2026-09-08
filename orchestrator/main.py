@@ -21,7 +21,6 @@ import logging
 import os
 import re
 import time
-import time as _time
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from uuid import uuid4
@@ -91,6 +90,7 @@ from orchestrator.state_sync import StateSynchronizer
 from orchestrator.worker_registry import WorkerRegistry
 from routers.ab_testing import create_ab_testing_routes
 from routers.candidates import create_candidate_routes
+from routers.integrity import _calculate_session_integrity_score
 from routers.integrity import router as integrity_router
 from routers.practice_sessions import router as practice_sessions_router
 from routers.questions import create_question_routes
@@ -291,11 +291,11 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         request_id = incoming if _VALID_ID_RE.match(incoming) else uuid4().hex
         request.state.request_id = request_id
         trace.get_current_span().set_attribute("request_id", request_id)
-        start = _time.perf_counter()
+        start = time.perf_counter()
         try:
             response = await call_next(request)
         except Exception:
-            elapsed_ms = (_time.perf_counter() - start) * 1000
+            elapsed_ms = (time.perf_counter() - start) * 1000
             log_event(
                 logger,
                 logging.ERROR,
@@ -306,7 +306,7 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
             )
             logger.debug("traceback", exc_info=True)
             raise
-        elapsed_ms = (_time.perf_counter() - start) * 1000
+        elapsed_ms = (time.perf_counter() - start) * 1000
         response.headers["X-Request-ID"] = request_id
         response.headers["X-Response-Time-ms"] = f"{elapsed_ms:.1f}"
         if request.url.path != "/health":
@@ -470,6 +470,7 @@ class SessionStatusResponse(BaseModel):
     status: str
     candidate_id: str
     risk_score: float | None = None
+    integrity_score: int | None = None
     assigned_node: str | None = None
     start_time: str | None = None
     end_time: str | None = None
@@ -1472,6 +1473,7 @@ async def list_interviews(
                 "candidate_id": r.candidate_id,
                 "status": r.status,
                 "risk_score": r.risk_score,
+                "integrity_score": _calculate_session_integrity_score(r.session_id),
                 "assigned_node": r.assigned_node,
                 "start_time": r.start_time.isoformat() if r.start_time else None,
                 "end_time": r.end_time.isoformat() if r.end_time else None,

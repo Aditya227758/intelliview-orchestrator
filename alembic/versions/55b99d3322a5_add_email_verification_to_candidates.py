@@ -22,24 +22,11 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     """Add email verification fields to candidates."""
 
-    op.add_column(
-        "candidates",
-        sa.Column(
-            "email_verified",
-            sa.Boolean(),
-            nullable=False,
-            server_default=sa.false(),
-        ),
-    )
+    # verification_token is already created by
+    # 003_add_candidate_features.py.
+    # email_verified is already created by an earlier migration.
+    # This migration adds only the remaining email verification fields.
 
-    op.add_column(
-        "candidates",
-        sa.Column(
-            "verification_token",
-            sa.String(255),
-            nullable=True,
-        ),
-    )
     op.create_index(
         "ix_candidates_verification_token",
         "candidates",
@@ -59,7 +46,15 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Remove email verification fields from candidates."""
-    op.drop_index("ix_candidates_verification_token", table_name="candidates")
-    op.drop_column("candidates", "verification_token_expires_at")
-    op.drop_column("candidates", "verification_token")
-    op.drop_column("candidates", "email_verified")
+
+    op.drop_column(
+        "candidates",
+        "verification_token_expires_at",
+    )
+
+    op.drop_index(
+        "ix_candidates_verification_token",
+        table_name="candidates",
+    )
+
+    # email_verified and verification_token are owned by earlier migrations.
