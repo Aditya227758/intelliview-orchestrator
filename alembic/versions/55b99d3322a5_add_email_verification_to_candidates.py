@@ -27,7 +27,6 @@ def upgrade() -> None:
     existing_indexes = {
         ix["name"] for ix in inspector.get_indexes("candidates") if ix.get("name")
     }
-
     if "email_verified" not in existing_columns:
         op.add_column(
             "candidates",
@@ -48,8 +47,10 @@ def upgrade() -> None:
                 nullable=True,
             ),
         )
-
-    if "ix_candidates_verification_token" not in existing_indexes:
+    if (
+        "verification_token" in existing_columns
+        and "ix_candidates_verification_token" not in existing_indexes
+    ):
         op.create_index(
             "ix_candidates_verification_token",
             "candidates",
